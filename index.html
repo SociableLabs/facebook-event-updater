@@ -33,7 +33,7 @@
                   <label for="id" class="col-lg-2 control-label">Event ID</label>
                   <div class="col-lg-10">
                     <input type="text" class="form-control" id="id" placeholder="Facebook Event ID">
-                    <span class="help-block">The number at the end of the Event's URL</span>
+                    <span class="help-block"><span class="label label-info">Tip:</span> Just past the event's URL here and we'll extract the ID.</span>
                   </div>
                 </div>
                 <div class="form-group">
@@ -139,6 +139,15 @@
         function getBaseUrl() {
             return 'https://graph.facebook.com/' + $id.val();
         }
+        
+        var re_event_url = /https?:\/\/www.facebook.com\/events\/(\d+)|https?:\/\/graph.facebook.com\/(\d+)/i;
+        $id.keyup(function() {
+            var matches = $id.val().match(re_event_url);
+            if (matches) {
+                var id = matches[1] || matches[2];
+                $id.val(id);
+            }
+        });
     
         $load.click(function() {
             $data.hide('fast');
