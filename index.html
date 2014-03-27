@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Facebook Event Updater</title>
+
+    <!-- Bootstrap w/ spaceab theme from bootswatch-->
+    <link href="//netdna.bootstrapcdn.com/bootswatch/3.1.1/spacelab/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+
+  </head>
+  <body>
+    <div class="container">
+        <h1>Facebook Event Updater</h1>
+    
+        <div class="well">
+            <form class="form-horizontal">
+              <fieldset>
+                <legend>Pre-requisites</legend>
+                <div class="form-group">
+                  <label for="id" class="col-lg-2 control-label">Event ID</label>
+                  <div class="col-lg-10">
+                    <input type="text" class="form-control" id="id" placeholder="Facebook Event ID">
+                    <span class="help-block">The number at the end of the Event's URL</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="access_token" class="col-lg-2 control-label">Access Token</label>
+                  <div class="col-lg-10">
+                    <input type="text" class="form-control" id="access_token" placeholder="Facebook Access Token">
+                    <span class="help-block">From <code>&lt;facebook-access-token&gt;</code> in the <code>customer-internal.xml</code> file on S3.</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="col-lg-10 col-lg-offset-2">
+                    <button type="button" class="btn btn-primary" id="load"><i></i> Load Event Data</button>
+                  </div>
+                </div>
+              </fieldset>
+            </form>
+        
+            <pre id="data" style="display: none;"></pre>
+        </div>
+    
+    
+        <div class="well">
+            <form class="form-horizontal">
+              <fieldset>
+                <legend>Update the event</legend>
+
+                <div class="form-group">
+                  <label for="field" class="col-lg-2 control-label">Field to Update</label>
+                  <div class="col-lg-10">
+                    <select class="form-control" id="field">
+                      <option>name</option>
+                      <option>description</option>
+                      <option>start_time</option>
+                      <option>end_time</option>
+                      <option>location</option>
+                      <option>location_id</option>
+                      <option>privacy_type</option>
+                      <option>ticket_uri</option>
+                      <option>no_feed_story</option>
+                    </select>
+                    <span class="help-block">This app only supports updating one field at a time currently.</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="value" class="col-lg-2 control-label">New Value</label>
+                  <div class="col-lg-10">
+                    <textarea class="form-control" rows="3" id="value"></textarea>
+                    <span class="help-block">See Facebook's documentation for <a href="https://developers.facebook.com/docs/graph-api/reference/user/events/">User Events</a> and <a href="https://developers.facebook.com/docs/graph-api/reference/page/events">Page Events</a> for details on how to format each parameter.</span>
+                  </div>
+                  
+                </div>
+                <div class="form-group">
+                  <div class="col-lg-10 col-lg-offset-2">
+                    <button type="button" class="btn btn-primary" id="update"><i></i> Update</button>
+                  </div>
+                </div>
+              </fieldset>
+            </form>
+        </div>
+    </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    
+    <script>
+        
+        var $id = $('#id'),
+            $access_token = $('#access_token'),
+            $load = $('#load'),
+            $data = $('#data'),
+            $update = $('#update');
+            
+        function disableButton($btn) {
+            $btn.prop( "disabled", true ).find('i').addClass('fa fa-refresh fa-spin');
+        }
+        
+        function enableButton($btn) {
+            $btn.prop( "disabled", false ).find('i').removeClass('fa fa-refresh fa-spin');
+        }
+        function getBaseUrl() {
+            return 'https://graph.facebook.com/' + $id.val();
+        }
+    
+        $load.click(function() {
+            $data.hide('fast');
+            disableButton($load);
+            var access_token = $access_token.val();
+            $.getJSON(getBaseUrl() + '?access_token=' + access_token + '&callback=?')
+            .done(function(data  /*, jqXHR*/) {
+                 // pretty-print a JS object: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_native_JSON
+                var pretty_json = JSON.stringify(data, undefined, 2);
+                $('#data').text(pretty_json).show('slow');
+              })
+              .fail(function() {
+                alert('Error retrieving event from facebook');
+                console.error.apply(console, arguments);
+            })
+            .always(function() {
+                enableButton($load);
+            });
+        });
+        
+        $update.click(function() {
+            var data = {
+                    access_token: $access_token.val()
+                },
+                field = $('#field').val(),
+                value = $('#value').val();
+            disableButton($update);
+            data[field] = value;
+            $.post(getBaseUrl(), data)
+            .done(function(data  /*, jqXHR*/) {
+                 // pretty-print a JS object: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_native_JSON
+                if (data === true) {
+                    alert("The event was updated successfully!");
+                    $load.click();
+                } else {
+                    alert("The update was not accepted. Response was:\n" + JSON.stringify(data));
+                }
+              })
+              .fail(function() {
+                alert('Error retrieving event from facebook');
+                console.error.apply(console, arguments);
+            })
+            .always(function() {
+                enableButton($update);
+            });
+        });
+    </script>
+  </body>
+</html>
