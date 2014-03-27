@@ -11,12 +11,19 @@
     <!-- Font Awesome -->
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
     <style>
-        .clearfix { margin-bottom: 80px; }
+        body { background: linear-gradient(-20deg, #2B4B5A, #fff) fixed; }
+        header a { color: inherit; }
+        header a:hover { text-decoration: none; }
+        main { margin: 30px auto;}
+        .navbar-static-bottom { border-radius: 0; margin-bottom: 0; }
     </style>
   </head>
   <body>
-    <div class="container">
-        <h1><i class="fa fa-facebook-square"></i> Facebook Event Updater</h1>
+    <main class="container">
+        <header class="well">
+            <h1><a href="#"><i class="fa fa-facebook-square pull-left fa-2x"></i> Facebook Event Updater</a></h1>
+            <p>Manually edit events that were created via the Open Graph API</p>
+        </header>
     
         <div class="well">
             <form class="form-horizontal">
@@ -90,11 +97,9 @@
               </fieldset>
             </form>
         </div>
-    </div>
+    </main>
     
-    <div class="clearfix"></div>
-    
-    <footer class="navbar navbar-default navbar-fixed-bottom">
+    <footer class="navbar navbar-default navbar-static-bottom">
         <div class="container">
           <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
